@@ -1,15 +1,11 @@
-name: Deploy to GitHub Pages
+name: Deploy Blazor WASM to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  deploy:
+  deploy-to-github-pages:
     # use ubuntu-latest image to run steps on
     runs-on: ubuntu-latest
     steps:
@@ -17,18 +13,15 @@ jobs:
       - uses: actions/checkout@v2
 
       # install .NET Core SDK
-      - name: Setup .NET Core
+      - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
-          
-      # install dotnet wasm buildtools workload
-      - name: Install .NET WASM Build Tools
-        run: dotnet workload install wasm-tools
+          dotnet-version: 6.x
+          include-prerelease: true
           
       # publishes Blazor project to the release-folder
       - name: Publish .NET Core Project
-        run: dotnet publish BlazorAppWA/BlazorAppWA.csproj -c Release -p:GHPages=true -o release --nologo
+        run: dotnet publish BlazorAppWA/BlazorAppWA.csproj -c Release -o release --nologo
 
       # changes the base-tag in index.html from '/' to 'DemoBlazorWebAssembly' to match GitHub Pages repository subdirectory
       - name: Change base-tag in index.html from / to DemoBlazorWebAssembly
@@ -48,3 +41,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: release/wwwroot
+
+# Based on https://swimburger.net/blog/dotnet/how-to-deploy-aspnet-blazor-webassembly-to-github-pages
+# and https://gist.github.com/Carl-Hugo/721b848942083dc7739141a917a30653
